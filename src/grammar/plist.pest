@@ -1,0 +1,32 @@
+WHITESPACE = _{ " " | "\t" | NEWLINE }
+COMMENT = _{ "//" ~ (!NEWLINE ~ ANY)* }
+
+value = {
+    dict |
+    array |
+    string
+}
+
+dict = {
+    "{" ~ "}" |
+    "{" ~ pair+ ~ "}"
+}
+pair = { string ~ "=" ~ value ~ ";" }
+
+array = {
+    "(" ~ ")" |
+    "(" ~ value ~ ("," ~ value)* ~ ")"
+}
+
+string = {
+    string_quoted |
+    string_unquoted
+}
+string_unquoted = @{ (ASCII_ALPHANUMERIC | "_" | "." | "-" | "/" ~ !("/"))+ }
+string_quoted = ${ "\"" ~ string_contents ~ "\"" }
+string_contents = @{ string_atom* }
+string_atom = {
+    !("\"" | "\\") ~ ANY
+    | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+    | "\\0" ~ ASCII_DIGIT ~ ASCII_DIGIT
+}

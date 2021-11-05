@@ -1,0 +1,14 @@
+[package]
+name = "glyphspack"
+version = "0.1.0"
+authors = ["Florian Pircher <florian@addpixel.net>"]
+edition = "2018"
+description = "Convert between .glyphs and .glyphspackage files."
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+anyhow = "1.0"
+clap = "2.33.3"
+pest = "2.1.3"
+pest_derive = "2.1.0"
+rayon = "1.5.1"
