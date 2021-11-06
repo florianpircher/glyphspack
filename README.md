@@ -22,6 +22,14 @@ Options:
 
 Run with `--help` for a complete parameter description.
 
+## Installation
+
+Install `glyphspack` with [cargo](https://doc.rust-lang.org/cargo/):
+
+```sh
+$ cargo install glyphspack
+```
+
 ## License
 
 Licensed under either of
