@@ -3,25 +3,23 @@ use rayon::prelude::*;
 use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::fs;
-use std::io::Write;
 use std::path::Path;
 
 use crate::plist;
+use crate::{
+    FILE_EXT_GLYPH, FILE_PACKAGE_FONTINFO, FILE_PACKAGE_GLYPHS, FILE_PACKAGE_ORDER,
+    FILE_PACKAGE_UI_STATE, KEY_DISPLAY_STRINGS_PACKAGE, KEY_DISPLAY_STRINGS_STANDALONE, KEY_GLYPHS,
+    KEY_GLYPH_NAME,
+};
 
 pub fn unpack(in_path: &Path, out_path: &Path) -> Result<()> {
-    eprintln!(
-        "Unpacking {} into {}.",
-        in_path.display(),
-        out_path.display()
-    );
-
     // Read Font Info
 
-    let fontinfo_path = in_path.join("fontinfo.plist");
+    let fontinfo_path = in_path.join(FILE_PACKAGE_FONTINFO);
     let fontinfo_code = fs::read_to_string(&fontinfo_path)
-        .with_context(|| format!("cannot read fontinfo.plist at {}", fontinfo_path.display()))?;
+        .with_context(|| format!("cannot read font info at {}", fontinfo_path.display()))?;
     let fontinfo = plist::parse(plist::Root::Dict, &fontinfo_code)
-        .with_context(|| format!("cannot parse fontinfo at {}", fontinfo_path.display()))?;
+        .with_context(|| format!("cannot parse font info at {}", fontinfo_path.display()))?;
     let fontinfo = match fontinfo.value {
         plist::Value::Dict(x) => x,
         _ => unreachable!(),
@@ -33,9 +31,9 @@ pub fn unpack(in_path: &Path, out_path: &Path) -> Result<()> {
 
     // Read Order
 
-    let order_path = in_path.join("order.plist");
+    let order_path = in_path.join(FILE_PACKAGE_ORDER);
     let order_code = fs::read_to_string(&order_path)
-        .with_context(|| format!("cannot read order.plist at {}", order_path.display()))?;
+        .with_context(|| format!("cannot read order at {}", order_path.display()))?;
     let order = plist::parse(plist::Root::Array, &order_code)
         .with_context(|| format!("cannot parse order at {}", order_path.display()))?;
     let order = match order.value {
@@ -53,25 +51,16 @@ pub fn unpack(in_path: &Path, out_path: &Path) -> Result<()> {
 
     // Read Glyphs
 
-    let glyphs_path = in_path.join("glyphs");
-    let glyph_paths_iter = fs::read_dir(&glyphs_path).with_context(|| {
-        format!(
-            "cannot read contents of glyphs directory at {}",
-            glyphs_path.display()
-        )
-    });
+    let glyphs_path = in_path.join(FILE_PACKAGE_GLYPHS);
+    let glyph_paths_iter = fs::read_dir(&glyphs_path)
+        .with_context(|| format!("cannot read glyph listing at {}", glyphs_path.display()));
     let glyph_paths: Vec<_> = glyph_paths_iter
         .unwrap()
         .flat_map(|dir_entry| {
             let dir_entry = dir_entry
-                .with_context(|| {
-                    format!(
-                        "failed to read entry of glyphs directory at {}",
-                        glyphs_path.display()
-                    )
-                })
+                .with_context(|| format!("cannot read glyph entry at {}", glyphs_path.display()))
                 .unwrap();
-            if dir_entry.path().extension() == Some(OsStr::new("glyph")) {
+            if dir_entry.path().extension() == Some(OsStr::new(FILE_EXT_GLYPH)) {
                 return Some(dir_entry.path());
             } else {
                 return None;
@@ -82,31 +71,37 @@ pub fn unpack(in_path: &Path, out_path: &Path) -> Result<()> {
         .par_iter()
         .map(|path| {
             let glyph_code = fs::read_to_string(path)
-                .with_context(|| format!("cannot read contents of glyph at {}", path.display()))
+                .with_context(|| format!("cannot read glyph at {}", path.display()))
                 .unwrap();
             let glyphs_dict = plist::parse(plist::Root::Dict, &glyph_code)
                 .with_context(|| format!("cannot parse glyph at {}", path.display()))
                 .unwrap();
             let pairs = match glyphs_dict.value {
                 plist::Value::Dict(x) => x,
-                _ => {
-                    panic!("non-dictionary root value for glyph at {}", path.display());
-                }
+                _ => unreachable!(),
             };
 
             for (key, slice, _) in pairs.into_iter() {
-                if key == "glyphname" {
+                if key == KEY_GLYPH_NAME {
                     let glyphname = match slice.value {
                         plist::Value::String(x) => x,
                         _ => {
-                            panic!("non-string glyphname value for glyph at {}", path.display());
+                            panic!(
+                                "non-string `{}` value for glyph at {}",
+                                KEY_GLYPH_NAME,
+                                path.display()
+                            );
                         }
                     };
                     return (glyphname.to_string(), glyph_code);
                 }
             }
 
-            panic!("missing glyphname in glyph at {}", path.display());
+            panic!(
+                "missing `{}` in glyph at {}",
+                KEY_GLYPH_NAME,
+                path.display()
+            );
         })
         .collect();
     let glyphs_code_value = order
@@ -124,52 +119,40 @@ pub fn unpack(in_path: &Path, out_path: &Path) -> Result<()> {
         })
         .collect::<Vec<String>>()
         .join(",");
+    let glyphs_code = format!("{} = (\n{}\n);", KEY_GLYPHS, glyphs_code_value);
+    file_contents.push((KEY_GLYPHS.to_string(), glyphs_code));
 
     // Read UI State
 
-    let ui_state_path = in_path.join("UIState.plist");
+    let ui_state_path = in_path.join(FILE_PACKAGE_UI_STATE);
     if let Ok(ui_state_code) = fs::read_to_string(&ui_state_path) {
         let ui_state = plist::parse(plist::Root::Dict, &ui_state_code)
-            .with_context(|| format!("cannot read UI state at {}", ui_state_path.display()))?;
+            .with_context(|| format!("cannot parse UI state at {}", ui_state_path.display()))?;
         let ui_state = match ui_state.value {
             plist::Value::Dict(pairs) => pairs,
             _ => unreachable!(),
         };
-        let ui_state_codes: Vec<(&str, String)> = ui_state
-            .into_iter()
-            .map(|(key, slice, code)| {
-                if key == "displayStrings" {
-                    (
-                        "DisplayStrings",
-                        format!("DisplayStrings = (\n{}\n);", slice.code),
-                    )
-                } else {
-                    (key, code.to_string())
-                }
-            })
-            .collect();
 
-        for (key, code) in ui_state_codes {
+        for (key, slice, code) in ui_state {
+            let (key, code) = match key {
+                KEY_DISPLAY_STRINGS_PACKAGE => (
+                    KEY_DISPLAY_STRINGS_STANDALONE,
+                    format!("{} = (\n{}\n);", KEY_DISPLAY_STRINGS_STANDALONE, slice.code),
+                ),
+                _ => (key, code.to_string()),
+            };
+
             file_contents.push((key.to_string(), code));
         }
     }
 
-    // Write Glyphs File
+    // Write Standalone Glyphs File
 
-    let glyphs_code = format!("glyphs = (\n{}\n);", glyphs_code_value);
-    file_contents.push(("glyphs".to_string(), glyphs_code));
     file_contents.sort_by(|(a, _), (b, _)| a.cmp(b));
-
-    let mut glyphs_file = fs::File::create(&out_path)
-        .with_context(|| format!("cannot create glyphs file at {}", out_path.display()))?;
-
-    write!(glyphs_file, "{{\n").unwrap();
-
-    for (_, code) in file_contents {
-        write!(glyphs_file, "{}\n", code).unwrap();
-    }
-
-    write!(glyphs_file, "}}\n").unwrap();
+    plist::write_dict_file(
+        &out_path,
+        &file_contents.iter().map(|(_, x)| &**x).collect(),
+    )?;
 
     Ok(())
 }

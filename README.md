@@ -1,6 +1,26 @@
 # glyphspack
 
-Convert between .glyphs and .glyphspackage files.
+`glyphspack` converts between the  `.glyphs` and `.glyphspackage` file format flavors of the [Glyphs font editor](https://glyphsapp.com).
+
+In Glyphs, save a file to a different format with _File_ → _Save As…_ → _File Format_.
+
+## Usage
+
+```sh
+$ glyphspack SomeFont.glyphspackage
+Unpacking SomeFont.glyphspackage into SomeFont.glyphs.
+$ glyphspack OtherFont.glyphs
+Packing OtherFont.glyphs into OtherFont.glyphspackage.
+```
+
+Options:
+
+- Set the output file name with `-o`/`--out`.
+- Overwrite any existing files with `-f`/`--force`.
+- Suppress log messages with `-q`/`--quiet`.
+- Print the path of the exported file to stdout with `-p`/`--print-path`.
+
+Run with `--help` for a complete parameter description.
 
 ## License
 
