@@ -39,7 +39,7 @@ enum Operation {
 fn main() -> Result<()> {
     let config = App::new("glyphspack")
         .version("1.0")
-        .author("Florian Pircher <florian@addpixel.net>")
+        .author("Florian Pircher <florian@formkunft.com>")
         .about("Convert between .glyphs and .glyphspackage files. The conversion direction is automatically detected depending on whether <FILE> is a directory or not.")
         .after_help("See the Glyphs Handbook <https://glyphsapp.com/learn> for details on the standalone and the package format flavors.")
         .arg(

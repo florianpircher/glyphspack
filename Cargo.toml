@@ -1,7 +1,7 @@
 [package]
 name = "glyphspack"
 version = "1.0.0"
-authors = ["Florian Pircher <florian@addpixel.net>"]
+authors = ["Florian Pircher <florian@formkunft.com>"]
 edition = "2018"
 description = "Convert between .glyphs and .glyphspackage files."
 license = "MIT OR Apache-2.0"
