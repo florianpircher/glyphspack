@@ -18,7 +18,6 @@ Options:
 - Set the output file name with `-o`/`--out`.
 - Overwrite any existing files with `-f`/`--force`.
 - Suppress log messages with `-q`/`--quiet`.
-- Print the path of the exported file to stdout with `-p`/`--print-path`.
 
 Run with `--help` for a complete parameter description.
 

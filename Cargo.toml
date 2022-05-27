@@ -1,6 +1,6 @@
 [package]
 name = "glyphspack"
-version = "1.0.0"
+version = "2.0.0"
 authors = ["Florian Pircher <florian@formkunft.com>"]
 edition = "2018"
 description = "Convert between .glyphs and .glyphspackage files."
@@ -16,4 +16,4 @@ regex = "1.5.6"
 [dependencies.clap]
 version = "3.1.18"
 default-features = false
-features = [ "suggestions", "wrap_help" ]
+features = ["std", "suggestions", "wrap_help"]
