@@ -2,15 +2,21 @@
 
 `glyphspack` converts between the  `.glyphs` and `.glyphspackage` file format flavors of the [Glyphs font editor](https://glyphsapp.com).
 
-In Glyphs, save a file to a different format with _File_ → _Save As…_ → _File Format_.
-
 ## Usage
+
+Convert between `.glyphs` and `.glyphspackage` files:
 
 ```sh
 $ glyphspack SomeFont.glyphspackage
 Unpacking SomeFont.glyphspackage into SomeFont.glyphs
 $ glyphspack OtherFont.glyphs
 Packing OtherFont.glyphs into OtherFont.glyphspackage
+```
+
+Write the contents to the standard output:
+
+```sh
+$ glyphspack -fo /dev/stdout SomeFont.glyphspackage
 ```
 
 Options:
@@ -23,11 +29,18 @@ Run with `--help` for a complete parameter description.
 
 ## Installation
 
-Install `glyphspack` with [cargo](https://doc.rust-lang.org/cargo/):
+`glyphspack` can be installed from source with [cargo](https://doc.rust-lang.org/cargo/):
 
 ```sh
 $ cargo install glyphspack
 ```
+
+The [releases page](https://github.com/florianpircher/glyphspack/releases) provides pre-build executables for macOS (universal binary, works with both Apple silicon and Intel), Linux (x64 64 bit), and Windows (x64 64 bit).
+
+## Alternatives
+
+- In Glyphs, save a file to a different format with _File_ → _Save As…_ → _File Format_.
+- A similar tool written in Python is [glyphspkg](https://github.com/jenskutilek/glyphspkg).
 
 ## License
 
