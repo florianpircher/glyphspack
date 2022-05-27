@@ -15,7 +15,7 @@ pair = { string ~ "=" ~ value ~ ";" }
 
 array = {
     "(" ~ ")" |
-    "(" ~ value ~ ("," ~ value)* ~ ")"
+    "(" ~ value ~ ("," ~ value)* ~ (",")? ~ ")"
 }
 
 string = {
