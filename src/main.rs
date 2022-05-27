@@ -114,14 +114,14 @@ fn main() -> Result<()> {
     match operation {
         Operation::Pack => {
             if !quiet {
-                eprintln!("Packing {} into {}.", in_path.display(), out_path.display());
+                eprintln!("Packing {} into {}", in_path.display(), out_path.display());
             }
             pack::pack(in_path, &out_path, force)
         }
         Operation::Unpack => {
             if !quiet {
                 eprintln!(
-                    "Unpacking {} into {}.",
+                    "Unpacking {} into {}",
                     in_path.display(),
                     out_path.display()
                 );

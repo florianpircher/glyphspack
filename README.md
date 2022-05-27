@@ -8,9 +8,9 @@ In Glyphs, save a file to a different format with _File_ → _Save As…_ → 
 
 ```sh
 $ glyphspack SomeFont.glyphspackage
-Unpacking SomeFont.glyphspackage into SomeFont.glyphs.
+Unpacking SomeFont.glyphspackage into SomeFont.glyphs
 $ glyphspack OtherFont.glyphs
-Packing OtherFont.glyphs into OtherFont.glyphspackage.
+Packing OtherFont.glyphs into OtherFont.glyphspackage
 ```
 
 Options:
